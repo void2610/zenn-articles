@@ -3,8 +3,10 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+      "p": "npx zenn preview",
+      "new": "npx zenn new:article --slug ${npm_config_name}-$(date +%yy%mm%dd) && mkdir -p images/${npm_config_name}",
+      "clean:images": "find ./images -depth -type d -empty -exec rmdir {} \\;"
+    },
   "keywords": [],
   "author": "",
   "license": "ISC",
