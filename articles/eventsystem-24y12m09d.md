@@ -2,7 +2,7 @@
 title: "R3でローグライクゲームのレリックを実装する"
 emoji: "⚖️"
 type: "tech" # tech: 技術記事 / idea: アイデア
-topics: ["Unity", "R3", "csharp"]
+topics: ["Unity", "R3", "UniRx", "csharp"]
 published: true
 ---
 
