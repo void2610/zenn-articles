@@ -1,5 +1,5 @@
 ---
-title: "R3でローグライクゲームのレリックを実装する"
+title: "[Unity, R3]ローグライクゲームのレリックを実装する"
 emoji: "⚖️"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["Unity", "R3", "UniRx", "csharp"]
