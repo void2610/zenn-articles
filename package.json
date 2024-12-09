@@ -4,8 +4,8 @@
   "main": "index.js",
   "scripts": {
       "p": "npx zenn preview",
-      "new": "npx zenn new:article --slug ${npm_config_name}-$(date +%yy%mm%dd) && mkdir -p images/${npm_config_name}",
-      "clean:images": "find ./images -depth -type d -empty -exec rmdir {} \\;"
+      "n": "npx zenn new:article --slug ${npm_config_name}-$(date +%yy%mm%dd) && mkdir -p images/${npm_config_name}",
+      "clean": "find ./images -depth -type d -empty -exec rmdir {} \\;"
     },
   "keywords": [],
   "author": "",
