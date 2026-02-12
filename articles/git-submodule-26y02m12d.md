@@ -3,7 +3,7 @@ title: "Unity開発でも Git サブモジュールを使おう"
 emoji: "📦"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["Unity", "Git", "サブモジュール", "ゲーム開発"]
-published: false
+published: true
 ---
 
 ## はじめに
