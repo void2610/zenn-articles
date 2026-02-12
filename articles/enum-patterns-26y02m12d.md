@@ -8,10 +8,10 @@ published: false
 
 ## はじめに
 
-ゲーム開発では、アイテムの種類、キャラクターの状態、ステージのタイプなど、**固定の選択肢**を扱う場面が数多くあります。
+ゲーム開発では、アイテム種類、キャラクター状態、ステージタイプなど、**固定の選択肢**を扱う場面が数多くあります。
 こうした場面で活躍するのが C# の列挙型（Enum）です。
 
-この記事では、Enum をただ定義するだけでなく、**ゲーム開発の現場で本当に役立つ便利なパターン**を紹介します。
+この記事では、Enum をただ定義するところから一歩進んだ、ゲーム開発で役立つ便利なパターンを紹介します。
 
 ## そもそもなぜ Enum を使うのか
 
@@ -38,24 +38,16 @@ if (state == CharacterState.Running) { /* ... */ }
 
 - **値の追加は末尾に**: 途中に値を追加すると、シリアライズされたデータとの整合性が壊れる
 - **0 には "None" や "Unknown" を**: デフォルト値として安全に使える
-- **int へのキャストは最小限に**: 型安全のメリットが失われる
+- **intやstringへのキャストは最小限に**: 型安全のメリットが失われる
 
-```csharp
-// ゲーム開発でよくある Enum の定義例
-public enum ItemType
-{
-    None = 0,      // デフォルト値
-    Weapon = 1,
-    Armor = 2,
-    Potion = 3,
-    Material = 4,
-    // 新しい値は末尾に追加する
-}
-```
+## パターン1: 拡張メソッドを定義する
 
-## パターン1: 拡張メソッドで日本語名や情報を定義する
+Enum に直接メソッドを追加することはできませんが、**拡張メソッド**を使えば Enum に色々なメソッドを定義できます。
+Enumを引数に取るヘルパーメソッドを定義することもできますが、拡張メソッドにすることで、呼び出し側のコードが直感的になります。
 
-Enum に直接メソッドを追加することはできませんが、**拡張メソッド**を使えば Enum にメソッドを生やすことができます。
+ここで重要なのは、拡張メソッドで定義すべきなのは **Enum の値と1対1で対応する情報**だという点です。
+日本語名や色など、そのEnum値に固有の属性が適しています。
+HP や攻撃力のようなゲームバランスに関わるパラメータは、ScriptableObject やマスターデータなど別の仕組みで管理するのが良いでしょう。
 
 ### 基本の拡張メソッド
 
@@ -65,7 +57,6 @@ public enum EnemyType
     Slime,
     Goblin,
     Dragon,
-    DarkKnight,
 }
 
 public static class EnemyTypeExtensions
@@ -78,29 +69,18 @@ public static class EnemyTypeExtensions
         EnemyType.Slime => "スライム",
         EnemyType.Goblin => "ゴブリン",
         EnemyType.Dragon => "ドラゴン",
-        EnemyType.DarkKnight => "暗黒騎士",
         _ => throw new ArgumentOutOfRangeException(nameof(type)),
     };
 
     /// <summary>
-    /// 敵の基本HPを取得する
+    /// 敵のイメージカラーを取得する
     /// </summary>
-    public static int GetBaseHp(this EnemyType type) => type switch
+    public static Color GetColor(this EnemyType type) => type switch
     {
-        EnemyType.Slime => 10,
-        EnemyType.Goblin => 30,
-        EnemyType.Dragon => 500,
-        EnemyType.DarkKnight => 200,
+        EnemyType.Slime => Color.blue,
+        EnemyType.Goblin => Color.green,
+        EnemyType.Dragon => Color.red,
         _ => throw new ArgumentOutOfRangeException(nameof(type)),
-    };
-
-    /// <summary>
-    /// 飛行する敵かどうかを判定する
-    /// </summary>
-    public static bool IsFlying(this EnemyType type) => type switch
-    {
-        EnemyType.Dragon => true,
-        _ => false,
     };
 }
 ```
@@ -109,57 +89,39 @@ public static class EnemyTypeExtensions
 
 ```csharp
 var enemy = EnemyType.Dragon;
-
 Debug.Log(enemy.ToJapaneseName()); // "ドラゴン"
-Debug.Log(enemy.GetBaseHp());      // 500
-Debug.Log(enemy.IsFlying());       // true
+Debug.Log(enemy.GetColor());       // RGBA(1.000, 0.000, 0.000, 1.000)
 ```
 
-拡張メソッドを使うことで、Enum の値に紐づく情報をまとめて管理でき、呼び出し側も直感的に書けます。
+### スイッチ式について
 
-## パターン2: スイッチ式を活用する
-
-C# 8.0 以降で使えるスイッチ式（switch expression）を使うと、従来の `switch` 文よりも簡潔に書けます。
-
-### 従来の書き方
+上記のコード例では C# 8.0 以降で使える**スイッチ式（switch expression）**を使っています。
+従来の `switch` 文と比較してみましょう。
 
 ```csharp
 // 従来の switch 文
-public static string GetDescription(ItemType type)
+public static string ToJapaneseName(this EnemyType type)
 {
     switch (type)
     {
-        case ItemType.Weapon:
-            return "攻撃力を上げる装備";
-        case ItemType.Armor:
-            return "防御力を上げる装備";
-        case ItemType.Potion:
-            return "HPを回復するアイテム";
-        case ItemType.Material:
-            return "合成に使う素材";
+        case EnemyType.Slime:
+            return "スライム";
+        case EnemyType.Goblin:
+            return "ゴブリン";
+        case EnemyType.Dragon:
+            return "ドラゴン";
+        case EnemyType.DarkKnight:
+            return "暗黒騎士";
         default:
-            return "不明なアイテム";
+            throw new ArgumentOutOfRangeException(nameof(type));
     }
 }
 ```
 
-### スイッチ式を使った書き方
-
-```csharp
-// スイッチ式（C# 8.0 以降）
-public static string GetDescription(ItemType type) => type switch
-{
-    ItemType.Weapon => "攻撃力を上げる装備",
-    ItemType.Armor => "防御力を上げる装備",
-    ItemType.Potion => "HPを回復するアイテム",
-    ItemType.Material => "合成に使う素材",
-    _ => "不明なアイテム",
-};
-```
-
 スイッチ式は**式**なので、値を返すことに特化しており、`break` や `return` が不要です。
+Enum の拡張メソッドとの相性が非常に良いので、積極的に活用しましょう。
 
-### 複数の条件をまとめる
+また、複数の条件をまとめることもできます。
 
 ```csharp
 // 装備品かどうかを判定
@@ -170,73 +132,34 @@ public static bool IsEquipment(this ItemType type) => type switch
 };
 ```
 
-## パターン3: サマリーコメントで IDE の開発体験を向上させる
+## パターン2: サマリーコメントで IDE の開発体験を向上させる
 
 Rider や Visual Studio などの IDE では、サマリーコメント（`<summary>`）を書いておくと、**ホバー時にツールチップで説明が表示**されます。
 これにより、コードを読まなくても各値の意味が分かるようになります。
 
+![Riderでサマリーコメントがツールチップ表示される例](/images/enum-patterns/rider-summary-tooltip.png)
+*Rider でサマリーコメントがツールチップとして表示される*
+
 ```csharp
-/// <summary>
-/// ゲーム内のバフ効果の種類
-/// </summary>
+/// <summary> ゲーム内のバフ効果の種類 </summary>
 public enum BuffType
 {
-    /// <summary>
-    /// 効果なし
-    /// </summary>
+    /// <summary> 効果なし </summary>
     None = 0,
-
-    /// <summary>
-    /// 攻撃力が一定時間上昇する。重複時はスタックする。
-    /// </summary>
+    /// <summary> 攻撃力上昇 </summary>
     AttackUp = 1,
-
-    /// <summary>
-    /// 防御力が一定時間上昇する。重複時は効果時間が延長される。
-    /// </summary>
+    /// <summary> 防御力上昇 </summary>
     DefenseUp = 2,
-
-    /// <summary>
-    /// 移動速度が一定時間上昇する。重複しない（上書き）。
-    /// </summary>
+    /// <summary> 移動速度上昇 </summary>
     SpeedUp = 3,
-
-    /// <summary>
-    /// 一定時間、毎秒HPが回復する。重複時はスタックする。
-    /// </summary>
+    /// <summary> HP自動回復 </summary>
     Regeneration = 4,
-
-    /// <summary>
-    /// 一定時間、被ダメージを無効化する。重複しない（効果時間がリセットされる）。
-    /// </summary>
+    /// <summary> 無敵 </summary>
     Invincible = 5,
 }
 ```
 
-### 日本語名もサマリーに書く場合
-
-拡張メソッドを使わずに、サマリーコメントだけで日本語名を管理する方法もあります。
-
-```csharp
-public enum WeaponType
-{
-    /// <summary>剣 - 近距離攻撃。バランス型の武器。</summary>
-    Sword,
-
-    /// <summary>弓 - 遠距離攻撃。クリティカル率が高い。</summary>
-    Bow,
-
-    /// <summary>杖 - 魔法攻撃。MP消費で強力な範囲攻撃が可能。</summary>
-    Staff,
-
-    /// <summary>槍 - 中距離攻撃。リーチが長く、貫通攻撃が可能。</summary>
-    Spear,
-}
-```
-
-こうしておくと、IDE 上で `WeaponType.Sword` にカーソルを合わせるだけで「剣 - 近距離攻撃。バランス型の武器。」と表示されます。
-
-## パターン4: Flags 属性で複数の状態を組み合わせる
+## パターン3: Flags 属性で複数の状態を組み合わせる
 
 ゲーム開発では、キャラクターが複数の状態を同時に持つことがあります。`[Flags]` 属性を使えば、ビット演算で複数の状態を組み合わせられます。
 
@@ -268,55 +191,13 @@ if (effects.HasFlag(StatusEffect.Poison))
 effects &= ~StatusEffect.Poison;
 ```
 
-## パターン5: Enum とディクショナリでマスターデータを管理する
-
-小規模なマスターデータであれば、Enum をキーにしたディクショナリで管理するのもシンプルで便利です。
-
-```csharp
-public static class EnemyMaster
-{
-    // 敵のパラメータを定義する構造体
-    public readonly struct EnemyParam
-    {
-        public readonly string Name;
-        public readonly int Hp;
-        public readonly int Attack;
-        public readonly int Defense;
-
-        public EnemyParam(string name, int hp, int attack, int defense)
-        {
-            Name = name;
-            Hp = hp;
-            Attack = attack;
-            Defense = defense;
-        }
-    }
-
-    // 敵のマスターデータ
-    private static readonly Dictionary<EnemyType, EnemyParam> Data = new()
-    {
-        [EnemyType.Slime] = new("スライム", 10, 3, 1),
-        [EnemyType.Goblin] = new("ゴブリン", 30, 8, 5),
-        [EnemyType.Dragon] = new("ドラゴン", 500, 50, 30),
-        [EnemyType.DarkKnight] = new("暗黒騎士", 200, 35, 25),
-    };
-
-    /// <summary>
-    /// 敵のパラメータを取得する
-    /// </summary>
-    public static EnemyParam Get(EnemyType type) => Data[type];
-}
-```
-
 ## まとめ
 
 | パターン | 用途 |
 |---|---|
-| 拡張メソッド | Enum に日本語名やパラメータを紐づける |
-| スイッチ式 | 簡潔に値のマッピングを記述する |
+| 拡張メソッド + スイッチ式 | Enum に日本語名やイメージカラーなど1対1の情報を紐づける |
 | サマリーコメント | IDE 上で説明を表示する |
 | Flags 属性 | 複数の状態を組み合わせる |
-| ディクショナリ | 小規模マスターデータの管理 |
 
 Enum は単純な機能ですが、工夫次第でゲーム開発の様々な場面で活用できます。
 特に拡張メソッド + スイッチ式の組み合わせは、可読性が高く保守もしやすいのでおすすめです。
