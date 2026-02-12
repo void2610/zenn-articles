@@ -3,15 +3,15 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-      "p": "npx zenn preview",
-      "n": "npx zenn new:article --slug ${npm_config_name}-$(date +%yy%mm%dd) && mkdir -p images/${npm_config_name}",
-      "clean": "find ./images -depth -type d -empty -exec rmdir {} \\;"
-    },
+    "p": "npx zenn preview",
+    "n": "npx zenn new:article --slug ${npm_config_name}-$(date +%yy%mm%dd) && mkdir -p images/${npm_config_name}",
+    "clean": "find ./images -depth -type d -empty -exec rmdir {} \\;"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "zenn-cli": "^0.1.158"
+    "zenn-cli": "^0.4.5"
   }
 }
