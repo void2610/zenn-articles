@@ -1,5 +1,5 @@
 ---
-title: "Unity開発向け C# オレオレアナライザーを作ろう"
+title: "Unity開発者はC#オレオレアナライザーを作ろう"
 emoji: "🔍"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["Unity", "csharp", "dotnet", "GithubActions", "Roslyn"]
@@ -23,7 +23,7 @@ C# のコードフォーマット・静的解析ツールにはいくつかの�
 | **dotnet-format** | .NET 公式のフォーマッター。`.editorconfig` でルール設定可能。カスタムアナライザーで拡張できる | ◎ |
 | **StyleCop.Analyzers** | Microsoft が提供する定番のスタイルチェッカー | ○ |
 | **Roslynator** | 500以上のアナライザーとリファクタリングを提供 | ○ |
-| **ReSharper CLI** | JetBrains 製。高機能だが有料 | ○ |
+| **ReSharper CLI** | JetBrains 製。高機能で CLI ツールは無料 | ○ |
 
 `dotnet-format` + カスタムアナライザーの組み合わせは、**自分のプロジェクトに合ったルールを自由に定義できる**という点で最も柔軟です。
 
