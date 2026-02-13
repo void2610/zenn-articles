@@ -8,10 +8,11 @@ published: false
 
 ## はじめに
 
-AIが生成するコードがプロジェクトの規約に沿わなかったり、チーム制作でコードスタイルがバラバラになったりすることはよくあります。
-カスタムアナライザーを作れば、基本的な命名規則や改行ルールに加えて、独自のルールで違反を検出・自動修正できます。
-最近はAIでアナライザーを作ることも容易になってきたので、
-以下に私が実際に使用しているUnity向けカスタムアナライザーのリポジトリを示します。
+AIが生成するコードがプロジェクトの規約に沿わなかったり、チーム制作でコードスタイルがバラバラになったりすることがあると思います。
+C#でカスタムアナライザーを作れば、基本的な命名規則や改行ルールに加えて、独自のルールで違反を検出・自動修正できます。
+最近はAIでアナライザーを作ることも容易になってきたので、ぜひ作ってみるのはいかがでしょうか。
+
+参考に、私が実際に使用しているUnity向けカスタムアナライザーのリポジトリを置いておきます。
 https://github.com/void2610/unity-analyzers
 
 ## 他のフォーマットツールとの比較
@@ -39,7 +40,17 @@ Roslyn アナライザーは、C# コンパイラ（Roslyn）のAPIを使って�
 → アナライザーが解析 → 診断結果 → CodeFix が自動修正
 ```
 
-## プロジェクト構成
+## AIでアナライザーを作る
+
+Roslyn API は構造化されたパターンが多く、AIが得意な領域です。
+慣例的にテストコードもセットで用意する必要があるため、AI生成コードの品質も担保しやすいです。
+筆者のリポジトリの8つのルールも、全てClaudeCodeが実装しました。
+
+## カスタムアナライザーの作成手順
+
+以下に、AIを活用してアナライザーを作成する上での最低限の知識をまとめます。
+
+### プロジェクト構成
 
 アナライザープロジェクトは以下のような構成になります。
 
@@ -57,8 +68,39 @@ MyAnalyzers/
 - `Microsoft.CodeAnalysis.CSharp` パッケージを参照
 - NuGet パッケージとして配布するための設定が必要（`IsRoslynComponent`、`PackagePath` の指定など）
 
-## アナライザーの構成要素
+### .editorconfig での設定
 
+Unity プロジェクトのルートに `.editorconfig` を配置して、アナライザーのルールを制御できます。
+
+```ini:.editorconfig
+[*.cs]
+# カスタムアナライザーのルールを有効化
+dotnet_diagnostic.VUA0001.severity = warning
+dotnet_diagnostic.VUA0002.severity = warning
+```
+
+### ビルドと利用
+
+```bash
+# アナライザーをビルド・パッケージ化
+dotnet pack MyAnalyzers/MyAnalyzers.csproj -c Release -o ./nuget
+```
+
+ビルドしたアナライザーは `dotnet-format` 経由で利用します。
+
+```bash
+# 自動修正
+dotnet format Assembly-CSharp.csproj
+```
+
+活用例:
+- **AI生成コードをフォーマットする**: AI のルールに `dotnet format` の実行を組み込む
+- **CIで自動チェック**: GitHub Actions 等で `dotnet format --verify-no-changes` を実行し、規約違反のある PR を検出する
+- **エディタの保存時アクション**: 保存のたびにフォーマットを実行して常に規約に揃える
+
+## アナライザーの実装例
+
+以下に、簡単なアナライザーの実装例を示します。AIを使用する際はここの部分は不要かと思います。
 カスタムアナライザーは主に2つのコンポーネントで構成されます。
 
 ### DiagnosticAnalyzer（検出）
@@ -114,41 +156,6 @@ Unity 開発では `[SerializeField]` の有無でフィールドの命名規則
 こうしたマイナーな規則にはカスタムアナライザーの出番です。
 筆者のリポジトリではこのようなルールを含む8つのルールを実装しています。詳細は[リポジトリ](https://github.com/void2610/unity-analyzers)を参照してください。
 
-## .editorconfig での設定
-
-Unity プロジェクトのルートに `.editorconfig` を配置して、アナライザーのルールを制御できます。
-
-```ini:.editorconfig
-[*.cs]
-# カスタムアナライザーのルールを有効化
-dotnet_diagnostic.VUA0001.severity = warning
-dotnet_diagnostic.VUA0002.severity = warning
-```
-
-## ビルドと利用
-
-```bash
-# アナライザーをビルド・パッケージ化
-dotnet pack MyAnalyzers/MyAnalyzers.csproj -c Release -o ./nuget
-```
-
-ビルドしたアナライザーは `dotnet-format` 経由で利用します。
-
-```bash
-# 自動修正
-dotnet format Assembly-CSharp.csproj
-```
-
-活用例:
-- **AI生成コードをフォーマットする**: AI のルールに `dotnet format` の実行を組み込む
-- **CIで自動チェック**: GitHub Actions 等で `dotnet format --verify-no-changes` を実行し、規約違反のある PR を検出する
-- **エディタの保存時アクション**: 保存のたびにフォーマットを実行して常に規約に揃える
-
-## AIでアナライザーを作る
-
-Roslyn API は構造化されたパターンが多く、AIが得意な領域です。
-慣例的にテストコードもセットで用意する必要があるため、AI生成コードの品質も担保しやすいです。
-筆者のリポジトリの8つのルールも、全てClaudeCodeが実装しました。
 
 ## まとめ
 
