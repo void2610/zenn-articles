@@ -143,17 +143,18 @@ public static class CombatScenarios
 これで `Cmd/Ctrl + K` → Scenario タブに `Combat/EnemyTakesDamage` が並び、Run Scenario で全ステップが順次実行されて、各ステップの ✓ / ✗ と所要時間が表示されます。
 
 ステップは `ScenarioStep` の static ファクトリで組み立てます。
+いずれも末尾に任意引数 `description` を取れるため、下の表では省略しています。
 
 | ステップ | 説明 |
 | --- | --- |
 | `Run(path, args)` | `[LiminalCommand]` を呼ぶ。失敗で fail-fast |
-| `WaitSeconds(sec)` / `WaitFrames(n)` | 実時間 / フレーム数で待機 |
+| `WaitSeconds(seconds)` / `WaitFrames(frames)` | 実時間 / フレーム数で待機 |
 | `AssertEquals(fieldPath, expected)` / `AssertNotEquals(...)` | `[LiminalObservableField]` の現在値を検証 |
 | `AssertEventually(fieldPath, expected, timeoutSeconds)` | 値が期待値になるまで待ってから検証 |
 | `AssertCommandReturns(path, args, expected)` | コマンドの戻り値を検証 |
 | `LoadScene(sceneName)` | シーンをロード |
 
-全ステップの末尾には任意引数 `description` があり、実行結果に表示されるラベルになります (上のコード例の `"spawn 直後は満タン"` がこれです)。
+`description` は実行結果に表示されるラベルになります (上のコード例の `"spawn 直後は満タン"` がこれです)。
 
 ただの `yield return` の列なので、C# の制御構文 (ループや条件分岐、ヘルパーメソッド) をそのまま使ってシナリオを組めるのがポイントです。
 
