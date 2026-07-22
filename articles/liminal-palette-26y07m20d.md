@@ -1,5 +1,5 @@
 ---
-title: "AIからも叩けるUnity用コマンドパレット「LiminalPalette」"
+title: "AIの動作確認がテスト資産になるUnity用コマンドパレット「LiminalPalette」"
 emoji: "🎨"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["Unity", "csharp", "ClaudeCode", "AI", "個人開発"]
