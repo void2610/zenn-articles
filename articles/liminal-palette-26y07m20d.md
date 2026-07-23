@@ -2,7 +2,7 @@
 title: "AIの動作確認がテスト資産になるUnity用コマンドパレット「LiminalPalette」を作った"
 emoji: "🎨"
 type: "tech" # tech: 技術記事 / idea: アイデア
-topics: ["Unity", "csharp", "ClaudeCode", "AI", "個人開発"]
+topics: ["Unity", "csharp", "ClaudeCode", "AI", "testing"]
 published: false
 ---
 
